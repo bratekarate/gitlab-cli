@@ -6,7 +6,7 @@ projects | groups)
   shift
   SEARCH=$1
   shift
-	glab "$TYPE?simple=true&search=$SEARCH"
+	glab "$TYPE?simple=true&search=$SEARCH" "$@"
 	;;
 *)
 	echo "Error: '$1' is not a valid search type" >&2
