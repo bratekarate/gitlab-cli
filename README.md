@@ -30,6 +30,7 @@ export TOKEN=<TOKEN>
 
 glsearch groups testgroup | glsimple
 ```
+- Note: A safer variant is using `TOKEN_CMD`, which provides a command to be executed to retrieve the token. This way the token is not found in the history.
 - With `json-cache`
 ```sh
 glsearch groups testgroup | glsimple | jq_append
