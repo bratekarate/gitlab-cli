@@ -35,3 +35,5 @@ glsearch groups testgroup | glsimple
 glsearch groups testgroup | glsimple | jq_append
 ```
 - The cached JSON file will be saved at `/tmp/out.json` by default.
+- Use `jq_show` to show data from the default cache location
+- Use `jq_remove [INDEX]` to remove an entry. Default is the last entry. `jq_remove a` to remove all.
