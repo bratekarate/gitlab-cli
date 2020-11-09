@@ -1,5 +1,11 @@
 #!/bin/sh
 
+[ "$#" -lt 2 ] &&
+  {
+    echo 'Error: missing argument' >&2
+    exit 1
+  }
+
 case "$1" in
 projects | groups)
   TYPE=$1
