@@ -23,7 +23,7 @@ shell_picker() {
 
   while ! echo "$N" | grep -q '^[0-9]\+$' ||
     [ "$N" -ge "$(echo "$LIST" | wc -l)" ] ; do
-		printf '\nProject index: ' >&2
+		printf '\n%s: ' "$1" >&2
 		read -r N
 	done </dev/tty
 
@@ -31,7 +31,6 @@ shell_picker() {
 }
 
 TYPE=$1
-
 case "$TYPE" in
   p|projects)
     PROP=path_with_namespace
@@ -44,17 +43,17 @@ case "$TYPE" in
     ;;
 esac
 
-INPUT="${2:--}"
+LABEL="$2"
 
-if command -v "$GLAB_PICKER" >/dev/null; then
+if command -v "$(echo "$GLAB_PICKER" | cut -d' ' -f1)" >/dev/null; then
     set -- eval_picker
   elif command -v rofi >/dev/null; then
-    set -- rofi -dmenu -i -p 'Project' -no-custom
+    set -- rofi -dmenu -i -no-custom -p
   else
     set -- shell_picker
   fi
 
-cat "$INPUT" > /tmp/glab.json &&
+cat - > /tmp/glab.json &&
   jq --raw-output type /tmp/glab.json | grep -iq '^array$' ||
   {
     error 'Error: not an array response'
@@ -66,7 +65,7 @@ cat "$INPUT" > /tmp/glab.json &&
 		jq --raw-output '.[0]' /tmp/glab.json
 	else
 		jq --raw-output ".[] | \"\(.id)	\(.$PROP)\"" /tmp/glab.json |
-      "$@" |
+      "$@" "${LABEL:-Pick}" |
       cut -d '	' -f1 |
       xargs -I {} jq '.[] | select(.id == {})' /tmp/glab.json
 	fi
