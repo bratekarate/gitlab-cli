@@ -41,7 +41,7 @@ glsearch groups testgroup | glsimple
 With `$TOKEN_CMD`:
 ```sh
 export BASEURL=https://gitlab.com
-export TOKEN=$(bw get password https://google.com)
+export TOKEN_CMD=$(bw get password https://google.com)
 
 glsearch groups testgroup | glsimple
 ```
