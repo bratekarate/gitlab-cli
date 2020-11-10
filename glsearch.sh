@@ -26,8 +26,9 @@ URL="$TYPE?simple=true&per_page=100&page=$PAGE"
 
 # TODO: consider a cleaner way to handle extra params
 [ -n "$SEARCH" ] && URL="$URL&search=$(
-	echo "$SEARCH" | cut -d '/' -f1
-)&$(
+	echo "$SEARCH" | cut -d '/' -f1 | tr ' ' '+'
+)" && echo "$SEARCH" | grep -q '/' && 
+  URL="$URL&$(
 	echo "$SEARCH" | cut -d '/' -f2 | tr ',' '&'
 )"
 
