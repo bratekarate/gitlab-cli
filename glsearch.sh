@@ -7,17 +7,28 @@
 	}
 
 TYPE=$1
-SEARCH=$2
 shift
-
-[ -n "${SEARCH+x}" ] &&
+[ -n "${1+x}" ] &&
 	{
+		SEARCH=$1
 		shift
 	}
 
-URL="$TYPE?simple=true&per_page=100"
+[ -n "${1+x}" ] &&
+	{
+		PAGE=$1
+		shift
+	}
 
-[ -n "$SEARCH" ] &&
-	URL="$URL&search=$SEARCH"
+PAGE=${PAGE-1}
+
+URL="$TYPE?simple=true&per_page=100&page=$PAGE"
+
+# TODO: consider a cleaner way to handle extra params
+[ -n "$SEARCH" ] && URL="$URL&search=$(
+	echo "$SEARCH" | cut -d '/' -f1
+)&$(
+	echo "$SEARCH" | cut -d '/' -f2 | tr ',' '&'
+)"
 
 glab "$URL" "$@"

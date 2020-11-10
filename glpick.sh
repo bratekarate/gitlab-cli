@@ -13,6 +13,10 @@ error() {
 	exit 1
 }
 
+eval_picker() {
+  eval "$GLAB_PICKER"
+}
+
 shell_picker() {
 	LIST=$(awk '{print "["NR-1"] "$0}')
 	printf '%b\n' "$LIST" >&2
@@ -26,32 +30,32 @@ shell_picker() {
 	printf '%b\n' "$LIST" | sed -n "/^\[$N\]/{s/\[$N\] //g;p}"
 }
 
-[ "$#" -lt 1 ] &&
-	error 'Error: missing argument'
-
 TYPE=$1
-NAME=$2
-shift
-[ -n "$NAME" ] && shift
 
 case "$TYPE" in
-  projects|*/projects)
+  p|projects)
     PROP=path_with_namespace
+    ;;
+  .*)
+    PROP=${TYPE#.}
     ;;
   *)
     PROP=name
     ;;
 esac
 
-[ "$#" -eq 0 ] || ! command -v "$1" >/dev/null &&
-  if command -v rofi >/dev/null; then
-    set -- rofi -dmenu -p 'Project' -no-custom
+INPUT="${2:--}"
+
+if command -v "$GLAB_PICKER" >/dev/null; then
+    set -- eval_picker
+  elif command -v rofi >/dev/null; then
+    set -- rofi -dmenu -i -p 'Project' -no-custom
   else
     set -- shell_picker
   fi
 
-glsearch "$TYPE" "$NAME" -sSf >/tmp/glab.json &&
-  jq --raw-output type /tmp/glab.json | grep -i '^array$' ||
+cat "$INPUT" > /tmp/glab.json &&
+  jq --raw-output type /tmp/glab.json | grep -iq '^array$' ||
   {
     error 'Error: not an array response'
   } &&
