@@ -1,21 +1,23 @@
 #!/bin/sh
 
-[ "$#" -lt 2 ] &&
-  {
-    echo 'Error: missing argument' >&2
-    exit 1
-  }
+[ "$#" -lt 1 ] &&
+	{
+		echo 'Error: missing argument' >&2
+		exit 1
+	}
 
-case "$1" in
-projects | groups)
-  TYPE=$1
-  shift
-  SEARCH=$1
-  shift
-	glab "$TYPE?simple=true&search=$SEARCH&per_page=100" "$@"
-	;;
-*)
-	echo "Error: '$1' is not a valid search type" >&2
-	exit 1
-	;;
-esac
+TYPE=$1
+SEARCH=$2
+shift
+
+[ -n "${SEARCH+x}" ] &&
+	{
+		shift
+	}
+
+URL="$TYPE?simple=true&per_page=100"
+
+[ -n "$SEARCH" ] &&
+	URL="$URL&search=$SEARCH"
+
+glab "$URL" "$@"
