@@ -12,6 +12,7 @@ This project is not indended for users that don't want to interact with low-leve
 ## Dependencies:
   - `jq`
   - `curl` 
+  - `rofi` (optional)
 
 Works best together with [json-cache](https://github.com/bratekarate/json-cache) to cache and index results for later use.
 
@@ -20,12 +21,25 @@ Works best together with [json-cache](https://github.com/bratekarate/json-cache)
 ```sh
 git clone https://github.com/bratekarate/json-cache.git
 ```
-- Create symbolic links from each script file to any directory that is on the PATH.
-- Example command to link the scripts:
+- Create symbolic links from each script file to any directory that is on the PATH. The link target must not contain any extensions such as `.sh`.
+
+### Linux
+- Should be the same for WSL (untested).
+- Example using the provided install script:
 ```sh
-find "$PWD" -type f -name "*.sh" -exec test -x {} \; -print0 |
-  xargs -0 -I {} sh -c 'ln -s "$1" ~/.local/bin/"$(basename "${1%.*}")"' _ {}
+./install.sh "$HOME"/.local/bin
 ```
+
+### Windows (MSYS or CYGWIN)
+- Symbolic links can only be created with administrator privileges.
+- `curl` is expected to be already installed. The latest `jq` binary must be downloaded from github.
+- `jq` does not yet support binary mode, meaning it will always output in `CLRF` line endings. `-b` flag is already supported on master, but unreleased. Nevertheless, this project's programs will not be adapted just to work on windows. Instead, a wrapper script around jq should be put into place.
+- Example using the provided install script (`jq` download and creating wrapper script included):
+```sh
+# Example for MSYS (used by git bash)
+./install.sh msys "$HOME"/bin
+```
+- The `"$HOME"/bin` directory is just an example and may not exist and not be part of the `$PATH` environment variable. Either a `bin` directory must be created at a chosen location and added to `$PATH`, or alternatively, `/usr/bin` may be used as a second parameter for the install script.
 
 ## Usage
 
@@ -38,13 +52,27 @@ glsearch groups testgroup | glsimple
 ```
 - Note: A safer variant is using `TOKEN_CMD`, which provides a command to be executed to retrieve the token. This way the token is not found in the history.
 
-With `$TOKEN_CMD`:
+- With `$TOKEN_CMD`:
 ```sh
 export BASEURL=https://gitlab.com
 export TOKEN_CMD=$(bw get password https://google.com)
 
 glsearch groups testgroup | glsimple
 ```
+- [Bitwarden CLI](https://bitwarden.com/help/article/cli/#download-and-install) is an option to use for `$TOKEN_CMD`. Alternatively, the password may be saved to a plain text file and encrypted with gpg:
+```
+# save password to plain text file at /tmp/token before
+
+gpg --encrypt --recipient <KEY_ID> /tmp/token
+
+mv /tmp/token.asc "$HOME/.token.asc"
+rm /tmp/token
+```
+- Then, it can be used with `$TOKEN_CMD` as follows:
+```
+export TOKEN_CMD='gpg --decrypt "$HOME"/.token.asc'
+```
+
 With [json-cache](https://github.com/bratekarate/json-cache):
 ```sh
 glsearch groups testgroup | glsimple | jq_append
@@ -54,12 +82,12 @@ glsearch groups testgroup | glsimple | jq_append
 - Use `jq_remove [INDEX]` to remove an entry. Default is the last entry. `jq_remove a` to remove all.
 
 ## Low level API
-The `glab` command can be used to create any custom request. It accepts an URL as a parameter and after it **(!)** any curl parameters. Put the following in `.zshrc` for `curl` completion:
+- The `glab` command can be used to create any custom request. It accepts an URL as a parameter and after it **(!)** any curl parameters. Put the following in `.zshrc` for `curl` completion:
 ```zsh
 compdef glab=curl
 compder glsearch=curl
 ```
-Examples:
+- Examples:
 ```sh
 glab 'groups/12/projects?search=test&per_page=100' -sfS -H 'Accept: application/json' 
 ```
