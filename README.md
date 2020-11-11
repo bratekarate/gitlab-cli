@@ -3,9 +3,9 @@
 Interact with gitlabs REST API via shell. Basically just a wrapper around `curl` and `jq` to save some keystrokes. 
 
 ## Concept
-This CLI is not meant to abstract away curl or jq implementation details, the goal is rather to make interacting with gitlab through `curl` and `jq` less verbose while allowing and encouraging the use of low-level `curl` tweaks and own `jq` extensions.
+This CLI is not meant to abstract away`curl`or`jq`implementation details, the goal is rather to make interacting with gitlab through `curl` and `jq` less verbose while allowing and encouraging the use of low-level `curl` tweaks and own `jq` extensions.
 
-One essential idea of this project is to allow tweaking by the user so that unimplemented features still can be achieved by using the "base" command, `glab`, paired with custom curl flags and URIs as well as custom `jq` commands.
+One essential idea of this project is to allow tweaking by the user so that unimplemented features still can be achieved by using the "base" command, `glab`, paired with custom`curl`flags and URIs as well as custom `jq` commands.
 
 This project is not indended for users that don't want to interact with low-level tools such as `curl` or `jq` directly.
 
@@ -33,10 +33,13 @@ git clone https://github.com/bratekarate/json-cache.git
 ### Windows (MSYS or CYGWIN)
 - Symbolic links can only be created with administrator privileges.
 - `curl` is expected to be already installed. The latest `jq` binary must be downloaded from github.
-- `jq` does not yet support binary mode, meaning it will always output in `CLRF` line endings. `-b` flag is already supported on master, but unreleased. Nevertheless, this project's programs will not be adapted just to work on windows. Instead, a wrapper script around jq should be put into place.
-- Example using the provided install script (`jq` download and creating wrapper script included):
+- `jq` does not yet support binary mode, meaning it will always output in `CLRF` line endings. `-b` flag is already supported on master, but unreleased. Nevertheless, this project's programs will not be adapted just to work on windows. Instead, a wrapper script around`jq`should be put into place.
+
+Example using the provided install script (`jq` download and creating wrapper script included). Must be run in an elevated bash terminal:
 ```sh
 # Example for MSYS (used by git bash)
+
+# cd <PROJECT_DIR>
 ./install.sh msys "$HOME"/bin
 ```
 - The `"$HOME"/bin` directory is just an example and may not exist and not be part of the `$PATH` environment variable. Either a `bin` directory must be created at a chosen location and added to `$PATH`, or alternatively, `/usr/bin` may be used as a second parameter for the install script.
@@ -50,16 +53,16 @@ export TOKEN=<TOKEN>
 
 glsearch groups testgroup | glsimp
 ```
-- Note: A safer variant is using `TOKEN_CMD`, which provides a command to be executed to retrieve the token. This way the token is not found in the history.
+*Note: A safer variant is using `TOKEN_CMD`, which provides a command to be executed to retrieve the token. This way the token is not found in the history.*
 
-- With `$TOKEN_CMD`:
+With `$TOKEN_CMD`:
 ```sh
 export BASEURL=https://gitlab.com
 export TOKEN_CMD=$(bw get password https://google.com)
 
 glsearch groups testgroup | glsimp
 ```
-- [Bitwarden CLI](https://bitwarden.com/help/article/cli/#download-and-install) is an option to use for `$TOKEN_CMD`. Alternatively, the password may be saved to a plain text file and encrypted with gpg:
+[Bitwarden CLI](https://bitwarden.com/help/article/cli/#download-and-install) is an option to use for `$TOKEN_CMD`. Alternatively, the password may be saved to a plain text file and encrypted with gpg:
 ```
 # save password to plain text file at /tmp/token before
 
@@ -68,7 +71,7 @@ gpg --encrypt --recipient <KEY_ID> /tmp/token
 mv /tmp/token.asc "$HOME/.token.asc"
 rm /tmp/token
 ```
-- Then, it can be used with `$TOKEN_CMD` as follows:
+Then, it can be used with `$TOKEN_CMD` as follows:
 ```
 export TOKEN_CMD='gpg --decrypt "$HOME"/.token.asc'
 ```
@@ -82,8 +85,8 @@ glsearch groups testgroup | glsimp | jq_append
 - Use `jq_remove [INDEX]` to remove an entry. Default is the last entry. `jq_remove a` to remove all.
 
 ## Examples
-Search merge requests by project name and assigneename, check diff with vim and
-merge. The prompt to merge it will appear after vim is closed:
+Search merge requests by project name and assignee name, check diff with vim and
+merge. The prompt to merge will appear after vim is closed:
 ```
 glmergetool -p testproject -a theassignee 
 ```
@@ -117,7 +120,7 @@ requests belonging to that project which are assigned to the user.
 
 
 ## Low level API
-- The `glab` command can be used to create any custom request. It accepts an URL as a parameter and after it **(!)** any curl parameters. Put the following in `.zshrc` for `curl` completion:
+- The `glab` command can be used to create any custom request. It accepts an URL as a parameter and after it **(!)** any`curl`parameters. Put the following in `.zshrc` for `curl` completion:
 ```zsh
 compdef glab=curl
 compder glsearch=curl
