@@ -48,7 +48,7 @@ git clone https://github.com/bratekarate/json-cache.git
 export BASEURL=https://gitlab.com
 export TOKEN=<TOKEN>
 
-glsearch groups testgroup | glsimple
+glsearch groups testgroup | glsimp
 ```
 - Note: A safer variant is using `TOKEN_CMD`, which provides a command to be executed to retrieve the token. This way the token is not found in the history.
 
@@ -57,7 +57,7 @@ glsearch groups testgroup | glsimple
 export BASEURL=https://gitlab.com
 export TOKEN_CMD=$(bw get password https://google.com)
 
-glsearch groups testgroup | glsimple
+glsearch groups testgroup | glsimp
 ```
 - [Bitwarden CLI](https://bitwarden.com/help/article/cli/#download-and-install) is an option to use for `$TOKEN_CMD`. Alternatively, the password may be saved to a plain text file and encrypted with gpg:
 ```
@@ -75,11 +75,46 @@ export TOKEN_CMD='gpg --decrypt "$HOME"/.token.asc'
 
 With [json-cache](https://github.com/bratekarate/json-cache):
 ```sh
-glsearch groups testgroup | glsimple | jq_append
+glsearch groups testgroup | glsimp | jq_append
 ```
 - The cached JSON file will be saved at `/tmp/out.json` by default.
 - Use `jq_show` to show data from the default cache location
 - Use `jq_remove [INDEX]` to remove an entry. Default is the last entry. `jq_remove a` to remove all.
+
+## Examples
+Search merge requests by project name and assigneename, check diff with vim and
+merge. The prompt to merge it will appear after vim is closed:
+```
+glmergetool -p testproject -a theassignee 
+```
+This is roughly equivalent (except for some error handling) to:
+
+```
+glmergefind -p testproject -a theassignee | glpick M | xargs glmergerev
+```
+Where `glmergerev` expects project id and MR iid as parameters. The `M`
+flag is used with `glpick` to output project id and MR iid of the MR line
+by line, so that it can be transformed to two parameters with `xargs`. The
+lowercase `m` flag of `glpick` would output the entire JSON of the MR.
+
+For other usages of `glpick`, an uppercase flag is not necessary, as the id
+can be extracted easily with ` <COMMAND> | jq '.id'`. However, merge requests
+are interacted with through the project resource by project id and merge
+request iid, therefore requiring two IDs to interact with. This makes the `M`
+flag quite valuable when working with MR.
+
+In turn, `glmergefind` is mainly built upon `glsearch`, but also uses `glpick`
+to prompt the user for choices. When the intention is to search by merge
+requests by some property, `glmergefind` may not be necessary and `glsearch`
+may be used. `glmergefind` is intended for cases where the project or the
+assignee is known, but not their ids. `glsearch` is more suitable for script
+and `glmergefind` merely a convenience command.
+
+If `glmergefind` is run without arguments, the active MR assigned to the user
+will be queried. This is  equivalent to `glmergefind -a me`. `glmergefind -a me
+-p project` will query the project by name first and then output all merge
+requests belonging to that project which are assigned to the user.
+
 
 ## Low level API
 - The `glab` command can be used to create any custom request. It accepts an URL as a parameter and after it **(!)** any curl parameters. Put the following in `.zshrc` for `curl` completion:

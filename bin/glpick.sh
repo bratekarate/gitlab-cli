@@ -6,6 +6,7 @@
 
 cleanup() {
 	rm /tmp/glab.json 2>/dev/null
+	rm /tmp/glab.out.json
 	exit
 }
 
@@ -32,12 +33,17 @@ shell_picker() {
 }
 
 TYPE=$1
+MRID_ONLY=0
 case "$TYPE" in
 p | projects)
 	PROP=path_with_namespace
 	;;
 m | merge_requests)
 	PROP=title
+	;;
+M | merge_requests_ids)
+	PROP=title
+	MRID_ONLY=1
 	;;
 .*)
 	PROP=${TYPE#.}
@@ -57,7 +63,8 @@ else
 	set -- shell_picker
 fi
 
-cat - >/tmp/glab.json &&
+cat - >/tmp/glab.json
+	[ -s /tmp/glab.json ] &&
 	jq --raw-output type /tmp/glab.json | grep -iq '^array$' ||
 	{
 		error 'Error: not an array response'
@@ -72,4 +79,14 @@ cat - >/tmp/glab.json &&
 			"$@" "${LABEL:-Pick}") || exit &&
 			echo "$CHOICE" | cut -d '	' -f1 |
 			xargs -I {} jq '.[] | select(.id == {})' /tmp/glab.json
-	fi
+	fi >/tmp/glab.out.json &&
+	set -- jq -e &&
+	if [ "$MRID_ONLY" -eq 1 ]; then
+		set -- "$@" --raw-output '"\(.project_id)\n\(.iid)"'
+	else
+		set -- "$@" '.'
+	fi &&
+	cat /tmp/glab.out.json | "$@"
+
+# TODO: race condition
+#cleanup

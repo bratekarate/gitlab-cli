@@ -1,3 +1,7 @@
 #!/bin/sh
 
-glmergefind -i "$1" "$2" | xargs glmergerev
+
+RES=$(glmergefind "$@") &&
+  printf '%s' "$RES" | glpick M |
+  xargs glmergerev
+

@@ -2,9 +2,6 @@
 
 while getopts ":a:bcdefghijklmnop:qrstuvwxyz" O; do
 	case "$O" in
-	i)
-		IDS_ONLY=1
-		;;
 	p)
 		PROJECT="$OPTARG"
 		;;
@@ -21,7 +18,7 @@ shift $((OPTIND - 1))
 
 if [ -n "$PROJECT" ]; then
 	# TODO: remove workaround as soon as jq is released
-	PROJECT=$(glsearch projects "$PROJECT" | glpick -p) || exit 1
+	PROJECT=$(glsearch projects "$PROJECT" | glpick p) || exit 1
 	PRID=$(echo "$PROJECT" | jq -e '.id')
   URL="projects/$PRID/merge_requests?state=opened"
 else 
@@ -46,11 +43,4 @@ fi
 
 URL="$URL&per_page=100"
 
-MR=$(glab "$URL" | glpick m) || exit 1
-
-set -- jq -e
-
-[ "$IDS_ONLY" -eq 1 ] &&
-	set -- "$@" --raw-output '"\(.project_id)\n\(.iid)"'
-
-printf '%s\n' "$MR" | "$@"
+glab "$URL" || exit 1
