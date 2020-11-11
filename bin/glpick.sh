@@ -80,13 +80,11 @@ cat - >/tmp/glab.json
 			echo "$CHOICE" | cut -d '	' -f1 |
 			xargs -I {} jq '.[] | select(.id == {})' /tmp/glab.json
 	fi >/tmp/glab.out.json &&
-	set -- jq -e &&
 	if [ "$MRID_ONLY" -eq 1 ]; then
-		set -- "$@" --raw-output '"\(.project_id)\n\(.iid)"'
+    glmergecut /tmp/glab.out.json
 	else
-		set -- "$@" '.'
-	fi &&
-	cat /tmp/glab.out.json | "$@"
+    jq -e < /tmp/glab.out.json
+	fi
 
 # TODO: race condition
 #cleanup
