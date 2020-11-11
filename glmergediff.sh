@@ -1,6 +1,12 @@
 #!/bin/sh
 
-JQDIFF='.changes | .[] | "diff --git a/glsimp.sh b/glsimp2.sh\n--- '"\
+[ "$#" -lt 2 ] &&
+  {
+    echo "Error: missing arguments." >&2
+    exit 1
+  }
+
+JQDIFF='.changes | .[] | "diff --git a/\(.old_path) b/\(.new_path)\n--- '"\
 "'\(.old_path)\n+++ \(.new_path)\n\(.diff)"'
 
 JSON=$(glab projects/"$1"/merge_requests/"$2"/changes) &&
