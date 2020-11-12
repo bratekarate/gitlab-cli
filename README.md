@@ -85,15 +85,16 @@ glsearch groups testgroup | glsimp | jq_append
 - Use `jq_remove [INDEX]` to remove an entry. Default is the last entry. `jq_remove a` to remove all.
 
 ## Examples
-Search merge requests by project name and assignee name, check diff with vim and
-merge. The prompt to merge will appear after vim is closed:
+Search merge requests by project name and assignee name, check diff with vim
+and merge. When using the `-m` flag, the prompt to merge will appear after vim
+is closed:
 ```
-glmergetool -p testproject -a theassignee 
+glmergetool -m -p testproject -a theassignee
 ```
 This is roughly equivalent (except for some error handling) to:
 
 ```
-glmergefind -p testproject -a theassignee | glpick M | xargs glmergerev
+glmergefind -p testproject -a theassignee | glpick M | xargs glmergerev -m
 ```
 Where `glmergerev` expects project id and MR iid as parameters. The `M`
 flag is used with `glpick` to output project id and MR iid of the MR line
@@ -105,6 +106,15 @@ can be extracted easily with ` <COMMAND> | jq '.id'`. However, merge requests
 are interacted with through the project resource by project id and merge
 request iid, therefore requiring two IDs to interact with. This makes the `M`
 flag quite valuable when working with MR.
+
+It's also possible to assemble a command to bulk review merge requests using
+`glmergefind`, `glmergecut` and `glmergerev`:
+
+```
+glmergefind -a me | glmergecut | xargs -n 2 glmergerev -m
+```
+This will open a diff and prompt for accepting each merge request assigned to
+the user.
 
 In turn, `glmergefind` is mainly built upon `glsearch`, but also uses `glpick`
 to prompt the user for choices. When the intention is to search by merge
