@@ -20,10 +20,10 @@ shift $((OPTIND - 1))
     exit 1
   }
 
-export PRPATH=$(glab projects/"$1" | jq --raw-output '.path_with_namespace' | sed 's|/|_|g')
-export TITLE=$(glab projects/"$1"/merge_requests/"$2"| jq --raw-output '.title' | sed 's/ /_/g')
+PRPATH=$(glab projects/"$1" | jq --raw-output '.path' | sed 's|/|_|g')
+TITLE=$(glab projects/"$1"/merge_requests/"$2"| jq --raw-output '.title' | sed 's/ /_/g')
 
-FILENAME="/tmp/${PRPATH}_$TITLE" 
+FILENAME="/tmp/${PRPATH}-$TITLE"
 glmergediff "$1" "$2" > "$FILENAME" &&
     {
       vim "$FILENAME" +'w' < /dev/tty
