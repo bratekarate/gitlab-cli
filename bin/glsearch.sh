@@ -22,7 +22,7 @@ shift
 
 PAGE=${PAGE-1}
 
-URL="$TYPE?simple=true&per_page=100&page=$PAGE"
+URL="$TYPE?simple=true&search_namespaces=true&per_page=100&page=$PAGE"
 
 # TODO: consider a cleaner way to handle extra params
 [ -n "$SEARCH" ] && URL="$URL&search=$(
