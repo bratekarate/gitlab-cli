@@ -3,8 +3,8 @@
 trap 'cleanup' EXIT
 
 error() {
-	echo "Error: $1" >&2
-	exit 1
+  echo "Error: $1" >&2
+  exit 1
 }
 
 cleanup() {
@@ -12,7 +12,7 @@ cleanup() {
 }
 
 [ "$#" -lt 1 ] &&
-	error 'missing arguments.'
+  error 'missing arguments.'
 
 TOKEN=${TOKEN:-$(eval "$TOKEN_CMD")}
 URI=$1
@@ -20,7 +20,7 @@ shift
 
 # shellcheck disable=SC2016
 [ -z "$TOKEN" ] || [ -z "$BASEURL" ] &&
-	error 'env variables $BASEURL and either $TOKEN or $TOKEN_CMD must be set.'
+  error 'env variables $BASEURL and either $TOKEN or $TOKEN_CMD must be set.'
 
 CODE=$(curl -s "$@" -H "PRIVATE-TOKEN: $TOKEN" "$BASEURL/api/v4/$URI" -o /tmp/curlout.json -w "%{http_code}")
 
