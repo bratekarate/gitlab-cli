@@ -1,15 +1,5 @@
 #!/bin/sh
 
-# TODO: fix trap (sometimes it just fires in the middle of the script)
-#trap 'cleanup' EXIT
-#trap 'exit 1' INT HUP QUIT TERM
-
-cleanup() {
-	rm /tmp/glab.json 2>/dev/null
-	rm /tmp/glab.out.json
-	exit
-}
-
 error() {
 	echo "$1" >&2
 	exit 1
@@ -63,28 +53,24 @@ else
 	set -- shell_picker
 fi
 
-cat - >/tmp/glab.json
-	[ -s /tmp/glab.json ] &&
-	jq --raw-output type /tmp/glab.json | grep -iq '^array$' ||
+PICKED=$(JSON=$(cat) export JSON &&
+	echo "$JSON" | jq -e 'type == "array"' > /dev/null ||
 	{
 		error 'Error: not an array response'
 	} &&
-	L=$(jq 'length' /tmp/glab.json) &&
+	L=$(echo "$JSON" | jq 'length') &&
 	[ "$L" -gt 0 ] ||
 	error 'No object was found.' &&
 	if [ "$L" -eq 1 ]; then
-		jq --raw-output '.[0]' /tmp/glab.json
+		echo "$JSON" | jq -r '.[0]'
 	else
-		CHOICE=$(jq --raw-output ".[] | \"\(.id)	\(.$PROP)\"" /tmp/glab.json |
+		CHOICE=$(echo "$JSON" | jq -r ".[] | \"\(.id)	\(.$PROP)\"" |
 			"$@" "${LABEL:-Pick}") || exit &&
 			echo "$CHOICE" | cut -d '	' -f1 |
-			xargs -I {} jq '.[] | select(.id == {})' /tmp/glab.json
-	fi >/tmp/glab.out.json &&
+			xargs -I {} sh -c 'echo "$JSON" | jq ".[] | select(.id == {})"'
+  fi) &&
 	if [ "$MRID_ONLY" -eq 1 ]; then
-    glmergecut /tmp/glab.out.json
+    echo "$PICKED" | glmergecut
 	else
-    jq -e < /tmp/glab.out.json
+    echo "$PICKED" | jq
 	fi
-
-# TODO: race condition
-#cleanup

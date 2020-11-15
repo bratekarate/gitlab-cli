@@ -1,8 +1,14 @@
 #!/bin/sh
 
+trap 'cleanup' EXIT
+
 error() {
 	echo "Error: $1" >&2
 	exit 1
+}
+
+cleanup() {
+  rm /tmp/curlout.json 2>/dev/null
 }
 
 [ "$#" -lt 1 ] &&
