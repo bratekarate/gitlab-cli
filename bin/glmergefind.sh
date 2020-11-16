@@ -25,9 +25,10 @@ else
   URL="merge_requests?state=opened"
 fi
 
+ASSIGNED_ME='scope=assigned-to-me'
 [ -n "$ASSIGNEE" ] &&
   if [ "$ASSIGNEE" = 'me' ]; then
-    ASSIG_PARAM='scope=assigned-to-me'
+    ASSIG_PARAM=$ASSIGNED_ME
   else
     if echo "$ASSIGNEE" | grep -iq '^[0-9]\+$'; then
       ASID=$ASSIGNEE
@@ -37,6 +38,8 @@ fi
     fi
     ASSIG_PARAM="assignee_id=$ASID"
   fi
+
+[ -z "$PROJECT" ] && [ -z "$ASSIG_PARAM" ] && ASSIG_PARAM=$ASSIGNED_ME
 
 [ -n "$ASSIG_PARAM" ] &&
   URL="$URL&$ASSIG_PARAM"

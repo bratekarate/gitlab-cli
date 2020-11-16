@@ -54,23 +54,23 @@ else
 fi
 
 PICKED=$(JSON=$(cat) export JSON &&
-  echo "$JSON" | jq -e 'type == "array"' >/dev/null ||
+  printf '%s' "$JSON" | jq -e 'type == "array"' >/dev/null ||
   {
     error 'Error: not an array response'
   } &&
-  L=$(echo "$JSON" | jq 'length') &&
+  L=$(printf '%s' "$JSON" | jq 'length') &&
   [ "$L" -gt 0 ] ||
   error 'No object was found.' &&
   if [ "$L" -eq 1 ]; then
-    echo "$JSON" | jq -r '.[0]'
+    printf '%s' "$JSON" | jq -r '.[0]'
   else
-    CHOICE=$(echo "$JSON" | jq -r ".[] | \"\(.id)	\(.$PROP)\"" |
+    CHOICE=$(printf '%s' "$JSON" | jq -r ".[] | \"\(.id)	\(.$PROP)\"" |
       "$@" "${LABEL:-Pick}") || exit &&
-      echo "$CHOICE" | cut -d '	' -f1 |
-      xargs -I {} sh -c 'echo "$JSON" | jq ".[] | select(.id == {})"'
+      printf '%s' "$CHOICE" | cut -d '	' -f1 |
+      xargs -I {} sh -c 'printf "%s" "$JSON" | jq ".[] | select(.id == {})"'
   fi) &&
   if [ "$MRID_ONLY" -eq 1 ]; then
-    echo "$PICKED" | glmergecut
+    printf '%s' "$PICKED" | glmergecut
   else
-    echo "$PICKED" | jq
+    printf '%s' "$PICKED" | jq
   fi
