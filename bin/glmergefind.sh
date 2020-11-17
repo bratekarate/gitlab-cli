@@ -18,7 +18,7 @@ shift $((OPTIND - 1))
 
 if [ -n "$PROJECT" ]; then
   # TODO: remove workaround as soon as jq is released
-  PROJECT=$(glsearch projects "$PROJECT" | glpick p) || exit 1
+  PROJECT=$(glsearch projects "$PROJECT" | glpick -p) || exit 1
   PRID=$(echo "$PROJECT" | jq -e '.id')
   URL="projects/$PRID/merge_requests?state=opened"
 else

@@ -33,5 +33,5 @@ RES=$(glmergefind "$@") &&
   if [ "$ACCEPT_MERGE" -eq 1 ]; then
     set -- "$@" -m
   fi &&
-  printf '%s' "$RES" | glpick M |
+  printf '%s' "$RES" | glpick -M |
   xargs "$@"

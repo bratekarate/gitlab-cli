@@ -94,7 +94,7 @@ glmergetool -m -p testproject -a theassignee
 This is roughly equivalent (except for some error handling) to:
 
 ```
-glmergefind -p testproject -a theassignee | glpick M | xargs glmergerev -m
+glmergefind -p testproject -a theassignee | glpick -M | xargs glmergerev -m
 ```
 Where `glmergerev` expects project id and MR iid as parameters. The `M`
 flag is used with `glpick` to output project id and MR iid of the MR line
