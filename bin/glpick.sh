@@ -1,7 +1,7 @@
 #!/bin/sh
 
 error() {
-  echo "$1" >&2
+  echo "Error: $1" >&2
   exit 1
 }
 
@@ -22,28 +22,31 @@ shell_picker() {
   printf '%b\n' "$LIST" | sed -n "/^\[$N\]/{s/\[$N\] //g;p}"
 }
 
-TYPE=$1
 MRID_ONLY=0
-case "$TYPE" in
-p | projects)
-  PROP=path_with_namespace
-  ;;
-m | merge_requests)
-  PROP=title
-  ;;
-M | merge_requests_ids)
-  PROP=title
-  MRID_ONLY=1
-  ;;
-.*)
-  PROP=${TYPE#.}
-  ;;
-*)
-  PROP=name
-  ;;
-esac
-
-LABEL="$2"
+PROP=name
+while getopts ':abc:defghijkl:mMnopqrstuvwxyz' O; do
+  case "$O" in
+  p)
+    PROP=path_with_namespace
+    ;;
+  m)
+    PROP=title
+    ;;
+  M)
+    PROP=title
+    MRID_ONLY=1
+    ;;
+  c)
+    PROP=$OPTARG
+    ;;
+  l)
+    LABEL=$OPTARG
+    ;;
+  *)
+    error "Unknown parameter -$O"
+    ;;
+  esac
+done
 
 if command -v "$(echo "$GLAB_PICKER" | cut -d' ' -f1)" >/dev/null; then
   set -- eval_picker
@@ -53,21 +56,21 @@ else
   set -- shell_picker
 fi
 
-PICKED=$(JSON=$(cat) export JSON &&
-  printf '%s' "$JSON" | jq -e 'type == "array"' >/dev/null ||
+export JSON_FILE=/tmp/glpick_$$.json
+PICKED=$(tee "$JSON_FILE" | jq -e 'type == "array"' >/dev/null ||
   {
-    error 'Error: not an array response'
+    error 'not an array response'
   } &&
-  L=$(printf '%s' "$JSON" | jq 'length') &&
+  L=$(jq 'length' "$JSON_FILE") &&
   [ "$L" -gt 0 ] ||
   error 'No object was found.' &&
   if [ "$L" -eq 1 ]; then
-    printf '%s' "$JSON" | jq -r '.[0]'
+    jq -r '.[0]' "$JSON_FILE"
   else
-    CHOICE=$(printf '%s' "$JSON" | jq -r ".[] | \"\(.id)	\(.$PROP)\"" |
+    CHOICE=$(jq -r ".[] | \"\(.id)	\(.$PROP)\"" "$JSON_FILE" |
       "$@" "${LABEL:-Pick}") || exit &&
       printf '%s' "$CHOICE" | cut -d '	' -f1 |
-      xargs -I {} sh -c 'printf "%s" "$JSON" | jq ".[] | select(.id == {})"'
+      xargs -I {} sh -c 'jq ".[] | select(.id == {})" "$JSON_FILE"'
   fi) &&
   if [ "$MRID_ONLY" -eq 1 ]; then
     printf '%s' "$PICKED" | glmergecut

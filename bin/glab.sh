@@ -8,7 +8,7 @@ error() {
 }
 
 cleanup() {
-  rm /tmp/curlout.json 2>/dev/null
+  rm /tmp/curlout_$$.json 2>/dev/null
 }
 
 [ "$#" -lt 1 ] &&
@@ -22,10 +22,12 @@ shift
 [ -z "$TOKEN" ] || [ -z "$BASEURL" ] &&
   error 'env variables $BASEURL and either $TOKEN or $TOKEN_CMD must be set.'
 
-CODE=$(curl -s "$@" -H "PRIVATE-TOKEN: $TOKEN" "$BASEURL/api/v4/$URI" -o /tmp/curlout.json -w "%{http_code}")
+mkfifo /tmp/curlout_$$.json
 
 jq --raw-output \
-  'if type == "array" then to_entries | [ .[] | {n: .key} + .value ] else . end' /tmp/curlout.json
+  'if type == "array" then to_entries | [ .[] | {n: .key} + .value ] else . end' /tmp/curlout_$$.json &
+
+CODE=$(curl -s "$@" -H "PRIVATE-TOKEN: $TOKEN" "$BASEURL/api/v4/$URI" -o /tmp/curlout_$$.json -w "%{http_code}")
 
 if echo "$CODE" | grep -q '^2[0-9]\{2\}'; then
   exit 0
