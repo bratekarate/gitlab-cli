@@ -10,7 +10,7 @@ eval_picker() {
 }
 
 shell_picker() {
-  LIST=$(awk '{print "["NR-1"] "$0}')
+  LIST=$(cat)
   printf '%b\n' "$LIST" >&2
 
   while ! echo "$N" | grep -q '^[0-9]\+$' ||
@@ -19,7 +19,7 @@ shell_picker() {
     read -r N
   done </dev/tty
 
-  printf '%b\n' "$LIST" | sed -n "/^\[$N\]/{s/\[$N\] //g;p}"
+  printf '%b\n' "$LIST" | sed -n "/^$N/p"
 }
 
 MRID_ONLY=0
@@ -67,10 +67,10 @@ PICKED=$(tee "$JSON_FILE" | jq -e 'type == "array"' >/dev/null ||
   if [ "$L" -eq 1 ]; then
     jq -r '.[0]' "$JSON_FILE"
   else
-    CHOICE=$(jq -r ".[] | \"\(.id)	\(.$PROP)\"" "$JSON_FILE" |
+    CHOICE=$(jq -r ".[] | \"\(.n)\t\(.id)\t\(.$PROP)\"" "$JSON_FILE" |
       "$@" "${LABEL:-Pick}") || exit &&
       printf '%s' "$CHOICE" | cut -d '	' -f1 |
-      xargs -I {} sh -c 'jq ".[] | select(.id == {})" "$JSON_FILE"'
+      xargs -I {} sh -c 'jq ".[] | select(.n == {})" "$JSON_FILE"'
   fi) &&
   if [ "$MRID_ONLY" -eq 1 ]; then
     printf '%s' "$PICKED" | glmergecut
