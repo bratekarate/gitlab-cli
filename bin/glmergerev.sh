@@ -20,8 +20,8 @@ shift $((OPTIND - 1))
     exit 1
   }
 
-PRPATH=$(glab projects/"$1" | jq --raw-output '.path' | sed 's|/|_|g')
-TITLE=$(glab projects/"$1"/merge_requests/"$2" | jq --raw-output '.title' | sed 's/ /_/g')
+PRPATH=$(glbody projects/"$1" | jq --raw-output '.path' | sed 's|/|_|g')
+TITLE=$(glbody projects/"$1"/merge_requests/"$2" | jq --raw-output '.title' | sed 's/ /_/g')
 
 FILENAME="/tmp/${PRPATH}-$TITLE"
 glmergediff "$1" "$2" >"$FILENAME" &&
