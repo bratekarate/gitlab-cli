@@ -2,7 +2,7 @@
 
 error() {
   echo "Error: $1" >&2
-  exit 1
+  exit "${2:-1}"
 }
 
 eval_picker() {
@@ -51,7 +51,7 @@ done
 if command -v "$(echo "$GLAB_PICKER" | cut -d' ' -f1)" >/dev/null; then
   set -- eval_picker
 elif command -v rofi >/dev/null; then
-  set -- rofi -dmenu -i -no-custom -p
+  set -- rofi -dmenu -i -no-custom -kb-custom-1 Alt+Right -kb-custom-2 Alt+Left -p
 else
   set -- shell_picker
 fi
@@ -63,7 +63,7 @@ PICKED=$(tee "$JSON_FILE" | jq -e 'type == "array"' >/dev/null ||
   } &&
   L=$(jq 'length' "$JSON_FILE") &&
   [ "$L" -gt 0 ] ||
-  error 'No object was found.' &&
+  error 'No object was found.' 2 &&
   if [ "$L" -eq 1 ]; then
     jq -r '.[0]' "$JSON_FILE"
   else

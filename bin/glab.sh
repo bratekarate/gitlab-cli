@@ -25,7 +25,7 @@ shift
 # TODO: fifo does not work on MSYS/CYGWIN. curl `-o` issue?
 # mkfifo /tmp/curlout_$$.json
 
-CODE=$(curl -Ss "$@" \
+CODE=$(curl -Ssi "$@" \
     -H "Private-Token: $TOKEN" \
     -H 'Content-Type: application/json' \
     -o /tmp/curlout_$$.json -w '%{http_code}' \
@@ -33,8 +33,7 @@ CODE=$(curl -Ss "$@" \
 
 echo "HTTP Code: $CODE" >&2
 
-jq --raw-output \
-  'if type == "array" then to_entries | [ .[] | {n: .key} + .value ] else . end' /tmp/curlout_$$.json
+cat /tmp/curlout_$$.json
 
 if echo "$CODE" | grep -q '^2[0-9]\{2\}'; then
   exit 0

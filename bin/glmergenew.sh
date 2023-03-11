@@ -14,6 +14,6 @@ DATA=$(jq -n --arg id "$1" --arg ti "$2" --arg s "$3" \
   --arg ta "$4" --arg a "$5" --arg tid "$TID" \
   '{id:$id,title:$ti,source_branch:$s,target_branch:$ta,assignee_id:$a,target_project_id:$tid}')
 
-glab projects/"$1"/merge_requests \
+glbody projects/"$1"/merge_requests \
   -X POST -H 'Content-Type: application/json' \
   --data "$DATA"
